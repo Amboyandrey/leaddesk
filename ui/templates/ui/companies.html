@@ -1,0 +1,35 @@
+{% extends "ui/base.html" %}
+{% block title %}Companies · LeadDesk{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Companies</h1></div>
+<div class="card">
+  <form class="filters" method="get">
+    <input type="search" name="q" value="{{ query }}" placeholder="Search name or domain" aria-label="Search">
+    <button type="submit">Search</button>
+  </form>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Domain</th><th>Industry</th><th>Leads</th><th>Summary</th></tr></thead>
+    <tbody>
+    {% for company in page %}
+      <tr>
+        <td><a href="{% url 'ui:board' %}?view=all&q={{ company.domain|urlencode }}"><strong>{{ company.domain }}</strong></a></td>
+        <td>{{ company.industry|default:"—" }}</td>
+        <td class="num">{{ company.lead_count }}</td>
+        <td class="muted small">{{ company.summary|truncatechars:140|default:"—" }}</td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="4" class="empty">No companies yet.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% if page.paginator.num_pages > 1 %}
+  <div class="pagination">
+    {% if page.has_previous %}<a href="?q={{ query|urlencode }}&page={{ page.previous_page_number }}">← Previous</a>{% endif %}
+    <span class="muted">Page {{ page.number }} of {{ page.paginator.num_pages }}</span>
+    {% if page.has_next %}<a href="?q={{ query|urlencode }}&page={{ page.next_page_number }}">Next →</a>{% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

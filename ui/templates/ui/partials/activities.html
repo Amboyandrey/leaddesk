@@ -1,0 +1,20 @@
+<h2>Activity</h2>
+<form hx-post="{% url 'ui:lead_activities' lead.pk %}" hx-target="#activities" hx-swap="innerHTML">
+  <div class="filters">
+    {{ activity_form.kind }}
+    {{ activity_form.occurred_at }}
+  </div>
+  {{ activity_form.body }}
+  {{ activity_form.non_field_errors }}{{ activity_form.kind.errors }}{{ activity_form.occurred_at.errors }}
+  <p><button class="primary" type="submit">Log activity</button></p>
+</form>
+<ul class="timeline">
+  {% for activity in activities %}
+    <li>
+      <span class="badge">{{ activity.get_kind_display }}</span> {{ activity.body|default:"" }}
+      <div class="meta">{{ activity.occurred_at|date:"M j, Y H:i" }}{% if activity.created_by %} · {{ activity.created_by.get_username }}{% endif %}</div>
+    </li>
+  {% empty %}
+    <li class="muted small">No activity yet.</li>
+  {% endfor %}
+</ul>

@@ -1,0 +1,39 @@
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr>
+      <th>Company</th><th>Contact</th><th>Status</th><th>Score</th>
+      {% if view == "priority" %}<th>Priority</th>{% endif %}
+      <th>Last touch</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for lead in page %}
+    <tr>
+      <td>
+        <a href="{% url 'ui:lead' lead.pk %}"><strong>{{ lead.company.domain }}</strong></a>
+        {% if lead.company.industry %}<div class="muted small">{{ lead.company.industry }}</div>{% endif %}
+      </td>
+      <td>{{ lead.contact.name|default:"—" }}<div class="muted small">{{ lead.contact.email }}</div></td>
+      <td><span class="badge status-{{ lead.status }}">{{ lead.get_status_display }}</span></td>
+      <td class="num">
+        {% if lead.qualification == "pending" %}<span class="badge">scoring…</span>
+        {% elif lead.qualification == "failed" %}<span class="badge bad">failed</span>
+        {% else %}{{ lead.fit_score }}{% endif %}
+      </td>
+      {% if view == "priority" %}<td class="num"><strong>{{ lead.priority|floatformat:1 }}</strong></td>{% endif %}
+      <td class="muted small">{% firstof lead.last_activity_at|timesince lead.created_at|timesince %} ago</td>
+    </tr>
+  {% empty %}
+    <tr><td colspan="6" class="empty">No leads match. <a href="{% url 'ui:lead_new' %}">Add one</a>.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% if page.paginator.num_pages > 1 %}
+<div class="pagination">
+  {% if page.has_previous %}<a href="?view={{ view }}&q={{ query|urlencode }}&status={{ status }}&page={{ page.previous_page_number }}">← Previous</a>{% endif %}
+  <span class="muted">Page {{ page.number }} of {{ page.paginator.num_pages }}</span>
+  {% if page.has_next %}<a href="?view={{ view }}&q={{ query|urlencode }}&status={{ status }}&page={{ page.next_page_number }}">Next →</a>{% endif %}
+</div>
+{% endif %}

@@ -11,8 +11,12 @@ from crm import n8n
 
 @pytest.fixture(autouse=True)
 def _isolated_cache_and_eager_celery(settings):
-    """Use a per-test in-memory cache and run Celery tasks inline."""
+    """Use a per-test in-memory cache, plain static files (no collectstatic), and run Celery tasks inline."""
     settings.CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}}
+    settings.STORAGES = {
+        **settings.STORAGES,
+        "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+    }
     cache.clear()
     settings.CELERY_TASK_ALWAYS_EAGER = True
     settings.CELERY_TASK_EAGER_PROPAGATES = True

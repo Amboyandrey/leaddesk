@@ -1,4 +1,4 @@
-"""Routes: the CRM API under /api/, token login, OpenAPI docs, and the Django admin."""
+"""Routes: the web UI at /, the CRM API under /api/, token login, OpenAPI docs, and the Django admin."""
 
 from django.contrib import admin
 from django.urls import include, path
@@ -22,4 +22,5 @@ urlpatterns = [
     path("api/integrations/n8n/lead-scored/", N8nLeadScoredView.as_view(), name="n8n-lead-scored"),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="docs"),
+    path("", include("ui.urls")),
 ]

@@ -1,0 +1,15 @@
+<div class="page-head">
+  <div>
+    <h1>{{ lead.company.domain }}</h1>
+    <p class="muted small">{{ lead.contact.name }} · <span class="badge status-{{ lead.status }}">{{ lead.get_status_display }}</span></p>
+  </div>
+  <div class="actions">
+    {% for value, label in allowed_statuses %}
+      <button hx-post="{% url 'ui:lead_status' lead.pk %}" hx-vals='{"status": "{{ value }}"}'
+              hx-target="#lead-header" hx-swap="innerHTML">Mark {{ label|lower }}</button>
+    {% empty %}
+      <span class="muted small">Final status, no further moves.</span>
+    {% endfor %}
+  </div>
+</div>
+{% if status_error %}<div class="alert" style="margin-bottom: 16px">{{ status_error }}</div>{% endif %}

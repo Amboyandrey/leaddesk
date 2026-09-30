@@ -1,0 +1,34 @@
+<div {% if lead.qualification == "pending" %}hx-get="{% url 'ui:lead_ai' lead.pk %}" hx-trigger="every 2s" hx-target="#ai-panel" hx-swap="innerHTML"{% endif %}>
+  <h2>AI assessment</h2>
+  {% if lead.qualification == "pending" %}
+    <div class="pending"><span class="spinner"></span><span>Reading {{ lead.company.domain }} and scoring the lead…</span></div>
+  {% elif lead.qualification == "failed" %}
+    <div class="alert">Scoring failed: {{ lead.qualification_error }}</div>
+    <p><button hx-post="{% url 'ui:lead_requalify' lead.pk %}" hx-target="#ai-panel" hx-swap="innerHTML">Try again</button></p>
+  {% else %}
+    <div class="page-head" style="margin-bottom: 8px">
+      <div>
+        <span class="score">{{ lead.fit_score }}</span><span class="muted"> / 100</span>
+        <span class="badge {% if lead.fit_score >= 70 %}good{% elif lead.fit_score >= 40 %}warn{% else %}bad{% endif %}">
+          {% if lead.fit_score >= 70 %}Strong fit{% elif lead.fit_score >= 40 %}Needs a look{% else %}Poor fit{% endif %}
+        </span>
+      </div>
+      <button hx-post="{% url 'ui:lead_requalify' lead.pk %}" hx-target="#ai-panel" hx-swap="innerHTML">Score again</button>
+    </div>
+    <dl class="kv">
+      <dt>They need</dt><dd>{{ lead.need|default:"—" }}</dd>
+      <dt>Company</dt><dd>{{ lead.company.summary|default:"—" }}</dd>
+    </dl>
+    {% if lead.suggested_reply %}
+      <h2 style="margin-top: 16px">Draft reply</h2>
+      <div class="reply" id="reply-{{ lead.pk }}">{{ lead.suggested_reply }}</div>
+      <button onclick="navigator.clipboard.writeText(document.getElementById('reply-{{ lead.pk }}').innerText); this.textContent = 'Copied'">Copy reply</button>
+    {% endif %}
+    {% if score_events %}
+      <p class="muted small" style="margin-top: 16px">
+        Scored {{ score_events|length }} time{{ score_events|length|pluralize }}:
+        {% for event in score_events %}{{ event.fit_score }} via {{ event.get_source_display }}{% if not forloop.last %}, {% endif %}{% endfor %}
+      </p>
+    {% endif %}
+  {% endif %}
+</div>

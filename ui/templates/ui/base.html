@@ -1,0 +1,28 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}LeadDesk{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'ui/app.css' %}">
+  <script src="{% static 'ui/htmx.min.js' %}" defer></script>
+</head>
+<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+  {% if user.is_authenticated %}
+  <header class="topbar">
+    <a class="brand" href="{% url 'ui:board' %}">LeadDesk</a>
+    <nav>
+      {% with name=request.resolver_match.url_name %}
+      <a href="{% url 'ui:board' %}" class="{% if name == 'board' %}active{% endif %}">Leads</a>
+      <a href="{% url 'ui:lead_new' %}" class="{% if name == 'lead_new' %}active{% endif %}">New lead</a>
+      <a href="{% url 'ui:companies' %}" class="{% if name == 'companies' %}active{% endif %}">Companies</a>
+      <a href="{% url 'docs' %}">API</a>
+      {% endwith %}
+    </nav>
+    <span class="muted small">{{ user.get_username }}</span>
+    <form method="post" action="{% url 'ui:logout' %}">{% csrf_token %}<button class="link" type="submit">Sign out</button></form>
+  </header>
+  {% endif %}
+  <main>{% block content %}{% endblock %}</main>
+</body>
+</html>
