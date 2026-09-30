@@ -1,0 +1,74 @@
+# LeadDesk: Django API, Celery worker, PostgreSQL, Redis.
+# Scoring calls the n8n Lead Tools MCP server on the n8n-local Docker network; start that stack first.
+x-app-env: &app_env
+  POSTGRES_HOST: postgres
+  POSTGRES_PORT: "5432"
+  REDIS_URL: redis://redis:6379/0
+  N8N_MCP_URL: http://n8n:5678/mcp/lead-tools
+  N8N_MCP_TOKEN_FILE: /run/secrets/n8n_mcp_token
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: leaddesk
+      POSTGRES_USER: leaddesk
+      POSTGRES_PASSWORD: leaddesk
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U leaddesk -d leaddesk"]
+      interval: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "127.0.0.1:6380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      retries: 10
+
+  web:
+    build: .
+    command: sh -c "python manage.py migrate --noinput && gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 30"
+    env_file: .env
+    environment:
+      <<: *app_env
+      DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1,leaddesk-web
+    ports:
+      - "127.0.0.1:8001:8000"
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    networks:
+      default: {}
+      # n8n pushes scoring results to http://leaddesk-web:8000
+      n8n:
+        aliases: [leaddesk-web]
+
+  worker:
+    build: .
+    command: celery -A config worker --loglevel=info --concurrency=2
+    env_file: .env
+    environment: *app_env
+    secrets: [n8n_mcp_token]
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    networks: [default, n8n]
+
+secrets:
+  n8n_mcp_token:
+    file: ${HOME}/.config/n8n-lead-tools/token
+
+networks:
+  n8n:
+    name: n8n-local_default
+    external: true
+
+volumes:
+  postgres_data:
