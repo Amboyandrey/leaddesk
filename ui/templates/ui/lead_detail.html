@@ -1,0 +1,19 @@
+{% extends "ui/base.html" %}
+{% block title %}{{ lead.company.domain }} · LeadDesk{% endblock %}
+{% block content %}
+<p class="small"><a href="{% url 'ui:board' %}">← All leads</a></p>
+<div id="lead-header" hx-get="{% url 'ui:lead_header' lead.pk %}" hx-trigger="lead-scored from:body" hx-swap="innerHTML">
+  {% include "ui/partials/lead_header.html" %}
+</div>
+<div class="grid">
+  <div class="stack">
+    <section class="card" id="ai-panel">{% include "ui/partials/ai_panel.html" %}</section>
+    <section class="card" id="activities" hx-get="{% url 'ui:lead_activities' lead.pk %}" hx-trigger="activity-changed from:body">
+      {% include "ui/partials/activities.html" %}
+    </section>
+  </div>
+  <aside class="card" id="lead-details" hx-get="{% url 'ui:lead_details' lead.pk %}" hx-trigger="lead-scored from:body">
+    {% include "ui/partials/lead_details.html" %}
+  </aside>
+</div>
+{% endblock %}

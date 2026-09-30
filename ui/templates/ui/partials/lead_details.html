@@ -1,0 +1,11 @@
+  <h2>Details</h2>
+  <dl class="kv">
+    <dt>Company</dt><dd>{{ lead.company.name }}<div class="muted small">{{ lead.company.domain }}</div></dd>
+    <dt>Industry</dt><dd>{{ lead.company.industry|default:"—" }}</dd>
+    <dt>Contact</dt><dd>{{ lead.contact.name|default:"—" }}<div class="muted small">{{ lead.contact.email }}</div></dd>
+    <dt>Owner</dt><dd>{{ lead.owner.get_username|default:"—" }}</dd>
+    <dt>Source</dt><dd>{{ lead.get_source_display }}</dd>
+    <dt>Created</dt><dd>{{ lead.created_at|date:"M j, Y H:i" }}</dd>
+  </dl>
+  <h2 style="margin-top: 16px">Their message</h2>
+  <p>{{ lead.message|default:"—"|linebreaksbr }}</p>

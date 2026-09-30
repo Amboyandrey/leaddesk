@@ -1,0 +1,33 @@
+{% extends "ui/base.html" %}
+{% block title %}Leads · LeadDesk{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Leads</h1>
+    <p class="muted small">
+      {% if view == "priority" %}Open leads, best first: fit score, cooled by time since the last touch, lifted by recent activity.
+      {% else %}Every lead, newest first.{% endif %}
+    </p>
+  </div>
+  <a class="button primary" href="{% url 'ui:lead_new' %}">+ New lead</a>
+</div>
+
+<div class="card">
+  <form class="filters" hx-get="{% url 'ui:board' %}" hx-target="#lead-rows" hx-push-url="true"
+        hx-trigger="input changed delay:300ms from:input, change from:select">
+    <div class="tabs">
+      <a href="?view=priority" class="{% if view == 'priority' %}active{% endif %}">Priority</a>
+      <a href="?view=all" class="{% if view == 'all' %}active{% endif %}">All leads</a>
+    </div>
+    <input type="hidden" name="view" value="{{ view }}">
+    <input type="search" name="q" value="{{ query }}" placeholder="Search company or contact" aria-label="Search">
+    {% if view == "all" %}
+    <select name="status" aria-label="Status">
+      <option value="">Any status</option>
+      {% for value, label in statuses %}<option value="{{ value }}" {% if value == status %}selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+    {% endif %}
+  </form>
+  <div id="lead-rows">{% include "ui/partials/lead_rows.html" %}</div>
+</div>
+{% endblock %}

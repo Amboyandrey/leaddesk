@@ -6,7 +6,7 @@ from rest_framework.request import Request
 INTEGRATION_GROUP = "integrations"
 
 
-def _is_integration(user) -> bool:
+def is_integration_account(user) -> bool:
     """Report whether the user is a machine account, caching the answer on the user for this request."""
     if not hasattr(user, "_is_integration"):
         user._is_integration = user.groups.filter(name=INTEGRATION_GROUP).exists()
@@ -18,7 +18,7 @@ class IsTeamMember(BasePermission):
 
     def has_permission(self, request: Request, view) -> bool:
         user = request.user
-        return bool(user and user.is_authenticated and not _is_integration(user))
+        return bool(user and user.is_authenticated and not is_integration_account(user))
 
 
 class CanIngestN8nResults(BasePermission):

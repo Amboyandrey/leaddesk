@@ -1,0 +1,18 @@
+{% extends "ui/base.html" %}
+{% block title %}Sign in · LeadDesk{% endblock %}
+{% block content %}
+<div class="card login">
+  <h1>LeadDesk</h1>
+  <p class="muted small">Sign in to see your leads.</p>
+  {% if form.errors %}<div class="alert">That username and password didn't match.</div>{% endif %}
+  <form method="post">
+    {% csrf_token %}
+    <label for="id_username">Username</label>
+    {{ form.username }}
+    <label for="id_password">Password</label>
+    {{ form.password }}
+    <input type="hidden" name="next" value="{{ next }}">
+    <p><button class="primary" type="submit">Sign in</button></p>
+  </form>
+</div>
+{% endblock %}

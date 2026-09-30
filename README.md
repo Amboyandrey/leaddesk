@@ -33,6 +33,17 @@ POST /api/leads/ ──► Django (company by domain, contact by email, lead) �
   Strong leads go cold if nobody touches them; recent calls and emails keep them near the top.
 - **Caching**: ranked pages are cached in Redis and invalidated on any lead or activity write.
 
+## Web UI
+
+Server-rendered Django templates with HTMX at `http://localhost:8001/` (sign in with a Django user):
+
+- **Leads**: the priority ranking, or every lead with status filter and live search.
+- **Lead page**: the AI assessment, which updates by itself while scoring runs; the draft reply with a
+  copy button; status buttons that offer only the moves the pipeline allows; and an activity timeline.
+- **New lead** and **Companies** pages.
+
+The UI calls the same services and rules as the API, so both behave identically.
+
 ## Data model
 
 `Company` (unique domain) → `Contact` (unique email, case-insensitive) → `Lead` → `Activity` and
